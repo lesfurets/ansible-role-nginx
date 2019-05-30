@@ -1,0 +1,55 @@
+---
+- name: Prepare
+  hosts: all
+  roles:
+    - role: lesfurets.epel
+      when: ansible_os_family == 'RedHat'
+    - role: lesfurets.python3
+  tasks:
+    - name: Install openssl for certificates
+      package:
+        name: openssl
+        state: present
+    - name: Create index.html
+      copy:
+        dest: index.html
+        content: '<html>Hello Molecule!!</html>'
+    - name: Generate dummy certificates
+      shell: >
+        /usr/bin/openssl req -x509 -nodes -days 365 -newkey rsa:2048
+        -keyout /srv/cert.key -out /srv/cert.pem
+        -subj "/C=FR/ST=Paris/L=Paris/O=Global Security/OU=IT
+        Department/CN=molecule.test.com"
+      changed_when: true
+    - name: Make a python webserver
+      shell: "nohup python3 -m http.server 8080 > /dev/null 2>&1 &"
+      changed_when: true
+- name: Converge
+  hosts: all
+  vars:
+    nginx_remove_default_vhost: true
+    nginx_vhosts:
+      - server_name: "molecule.test.com"
+        listen: "443"
+        use_ssl: true
+        redirect_http_https: true
+        ssl_params:
+          - ssl_certificate: "/srv/cert.pem"
+          - ssl_certificate_key: "/srv/cert.key"
+        locations:
+          - location: "/"
+            proxy_set_header:
+              - "Host $host"
+              - "X-Real-IP $remote_addr"
+              - "X-Forwarded-For $proxy_add_x_forwarded_for"
+              - "X-Forwarded-Proto $scheme"
+            proxy_pass: "http://localhost:8080"
+  roles:
+    - role: ansible-role-nginx
+- name: Prepare for tests
+  hosts: all
+  tasks:
+    - name: Install curl
+      package:
+        name: curl
+        state: present
