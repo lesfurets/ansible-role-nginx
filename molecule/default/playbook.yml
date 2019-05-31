@@ -15,15 +15,15 @@
         dest: index.html
         content: '<html>Hello Molecule!!</html>'
     - name: Generate dummy certificates
-      shell: >
+      command: >
         /usr/bin/openssl req -x509 -nodes -days 365 -newkey rsa:2048
         -keyout /srv/cert.key -out /srv/cert.pem
         -subj "/C=FR/ST=Paris/L=Paris/O=Global Security/OU=IT
         Department/CN=molecule.test.com"
-      changed_when: true
+      changed_when: false
     - name: Make a python webserver
       shell: "nohup python3 -m http.server 8080 > /dev/null 2>&1 &"
-      changed_when: true
+      changed_when: false
 - name: Converge
   hosts: all
   vars:

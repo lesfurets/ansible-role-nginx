@@ -1,5 +1,5 @@
 {# Redirect http to https if enabled #}
-{% if item.redirect_http_https %}
+{% if item.redirect_http_https is defined and item.redirect_http_https %}
 server {
     listen       80;
     return       301 https://$host$request_uri;
@@ -31,7 +31,7 @@ server {
 {% if item.extra_parameters is defined %}
     {{ item.extra_parameters|indent(4) }}
 {% endif %}
-{% if item.use_ssl %}
+{% if item.use_ssl is defined and item.use_ssl %}
     ssl on;
 {% if item.ssl_params is defined %}
 {% for param in item.ssl_params %}
