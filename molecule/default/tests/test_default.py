@@ -6,6 +6,11 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
 
+def test_user(host):
+    cmd = host.run('id webapp')
+    assert "nginx" in cmd.stdout or "www-data" in cmd.stdout
+
+
 def test_nginx_conf(host):
     cmd = host.run('nginx -t -c /etc/nginx/nginx.conf')
     assert cmd.rc == 0

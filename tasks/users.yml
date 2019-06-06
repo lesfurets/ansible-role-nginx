@@ -1,0 +1,8 @@
+---
+- name: Add capable users  to nginx group
+  user:
+    name: "{{ item }}"
+    groups: "{{ nginx_user }}"
+    append: true
+  loop: "{{ nginx_capable_users }}"
+  when: nginx_capable_users|length > 0

@@ -6,6 +6,10 @@
       when: ansible_os_family == 'RedHat'
     - role: lesfurets.python3
   tasks:
+    - name: Create user to add to nginx group
+      user:
+        name: webapp
+        state: present
     - name: Install openssl for certificates
       package:
         name: openssl
@@ -27,6 +31,8 @@
 - name: Converge
   hosts: all
   vars:
+    nginx_capable_users:
+      - "webapp"
     nginx_remove_default_vhost: true
     nginx_vhosts:
       - server_name: "molecule.test.com"
